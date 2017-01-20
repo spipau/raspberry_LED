@@ -51,14 +51,24 @@ import com.pi4j.io.gpio.RaspiPin;
 public class MainLED {
 	
 	public static void main(String args[]) throws InterruptedException {
-		
+        
+        System.out.println("#### START ####");
+        //showCase();
+        toggleLED(2000);
+        System.out.println("#### END ####");
+
+	}
+	
+	private static void showCase() throws InterruptedException {
+
 		// get a handle to the GPIO controller
     	final GpioController gpio = GpioFactory.getInstance();
         
         // creating the pin with parameter PinState.HIGH
         // will instantly power up the pin
         final GpioPinDigitalOutput pin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01, "PinLED", PinState.HIGH);
-        System.out.println("light is: ON");
+
+		System.out.println("light is: ON");
         
         // wait 1 seconds
         Thread.sleep(1000);
@@ -72,8 +82,42 @@ public class MainLED {
         // turn on GPIO 1 for 1 second and then off
         System.out.println("light is: ON for 1 second");
         pin.pulse(1000, true);
+	
+		// release the GPIO controller resources
+        gpio.shutdown();
+	}
+	
+	private static void toggleLED(int pause) throws InterruptedException {
+	
+		// get a handle to the GPIO controller
+    	final GpioController gpio = GpioFactory.getInstance();
         
-        // release the GPIO controller resources
+        // creating the pin with parameter PinState.HIGH
+        // will instantly power up the pin
+        final GpioPinDigitalOutput pin = gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01, "PinLED", PinState.HIGH);
+	
+		System.out.println("Press RETURN key to stop program.");
+		try {
+        
+			boolean toggle = false;
+			while (System.in.available() == 0) {
+				
+				if (toggle) {
+					pin.low();
+				} else {
+					pin.high();
+				}
+
+				 Thread.sleep(pause);
+				 toggle = !toggle;
+				 //System.out.println("toggle is: " + toggle);
+			}
+			
+		} catch (Exception e) {
+			System.out.println("error: " + e);
+		}
+	
+		// release the GPIO controller resources
         gpio.shutdown();
 	}
 }
